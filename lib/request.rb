@@ -39,7 +39,6 @@ module WebServer
         parse_header(line)
         line = next_line
       end
-      puts @headers
       # 3. Get the body
       parse_body
     end
