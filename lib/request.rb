@@ -1,7 +1,7 @@
 # The Request class encapsulates the parsing of an HTTP Request
 module WebServer
   class Request
-    attr_accessor :http_method, :uri, :version, :headers, :body, :params, :post_params
+    attr_accessor :http_method, :uri, :version, :headers, :body, :params
     @socket
 
     # Request creation receives a reference to the socket over which
@@ -75,7 +75,7 @@ module WebServer
         params = @body.split('&')
         params.each do |item|
           name,value = item.split('=')
-          @post_params[name] = value
+          @params[name] = value
         end
       end
 
@@ -88,7 +88,6 @@ module WebServer
       puts "HEADERS:" + @headers.inspect
       puts "BODY:" + @body.inspect
       puts "PARAMS:" + @params.inspect
-      puts "POST PARAMS:" + @post_params.inspect
     end
   end
 end
