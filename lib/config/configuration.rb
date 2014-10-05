@@ -3,7 +3,7 @@
 # HttpdConf and MimeTypes, both derived from this parent class.
 module WebServer
   class Configuration
-    def initialize(options={})
+    def initialize(file_content)
     end
   end
 end
