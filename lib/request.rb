@@ -41,6 +41,7 @@ module WebServer
       end
       # 3. Get the body
       parse_body
+      show
     end
 
     # The following lines provide a suggestion for implementation - feel free
@@ -51,15 +52,25 @@ module WebServer
 
     def parse_request_line      
       params = next_line.split(' ')
+      puts params.inspect
       @http_method = params[0]
-      @uri = params[1][/.*\//]
+
+      # analysis URI format 
+      # <scheme name> : <hierarchical part> [? <query>] [# <fragment>]
+      if (params[1][/\?/])
+        @uri = params[1][/.*(?=\?)/]
+              # get uri paramas
+        if uri_params = params[1][/(?<=\?).*/]
+          name,value = uri_params.split('=')
+          @params[name] = value
+        end
+      else
+        @uri = params[1]
+      end
+      
       @version = params[2]
 
-      # get uri paramas
-      if uri_params = params[1][/(?<=\?).*/]
-        name,value = uri_params.split('=')
-        @params[name] = value
-      end
+
     end
 
     def parse_header(header_line)

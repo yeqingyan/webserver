@@ -11,12 +11,13 @@ module WebServer
    			config_line.strip!
    			next if config_line.empty? || config_line[0] == '#'
    			type,ext = config_line.split(' ', 2)
+        next if ext.nil?
    			if ext.split.is_a?(String)
    				@config_hash[ext] = type
    			else
    				ext.split(' ').each do |item|
-					@config_hash[item] = type
-				end
+            @config_hash[item] = type
+				  end
    			end
    		end
     end

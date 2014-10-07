@@ -3,21 +3,27 @@ module WebServer
     # Provides the base functionality for all HTTP Responses 
     # (This allows us to inherit basic functionality in derived responses
     # to handle response code specific behavior)
+
+    # By YEQING YAN 
+    # Base is 200
     class Base
-      attr_reader :version, :code, :body, :type
+      attr_reader :version, :code, :body, :request
 
       def initialize(resource, options={})
-        @type = resource
+        @request = resource
         
+        #if request.http_method == "GET"
+        #  get_uri(request.uri)
+        #else 
+        #  @body = ""
+        #end
         if options["BODY"]
           @body = options["BODY"]
         else
           @body = ""
         end
 
-        if options["CODE"]
-          @code = options["CODE"]
-        end
+        @code = 200
       end
 
       def to_s

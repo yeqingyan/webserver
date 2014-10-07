@@ -15,6 +15,16 @@ module WebServer
       500 => 'Internal Server Error'
     }
 
+    # general headers
+    GHEADERS = {
+      'Connection' => 'close'
+    }
+
+    # Content type
+    CTYPE = {
+      'DEFAULT' => 'text/html'
+    }
+
     def self.default_headers
       {
         'Date' => Time.now.strftime('%a, %e %b %Y %H:%M:%S %Z'),
@@ -23,8 +33,15 @@ module WebServer
     end
 
     module Factory
-      def self.create(resource)
-        Response::Base.new(resource)
+      def self.create(resource, options)
+        case resource 
+        when 200
+          Response::Base.new(resource, options)
+        when 403
+          Response::Forbidden.new(resource, options)
+        when 404
+          Response::NotFound.new(resource, options)
+        end
       end
 
       def self.error(resource, error_object)
