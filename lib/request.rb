@@ -2,16 +2,14 @@
 module WebServer
   class Request
     attr_accessor :http_method, :uri, :version, :headers, :body, :params
-    @socket
 
     # Request creation receives a reference to the socket over which
     # the client has connected
     def initialize(socket)
-
+      @socket = socket
       @headers = Hash.new
       @params = Hash.new
-      @post_params = Hash.new
-      @socket = socket
+      @body = ""
 
       # Perform any setup, then parse the request
       parse
@@ -30,17 +28,21 @@ module WebServer
     # Parse the request from the socket - Note that this method takes no
     # parameters
     def parse
-      # 1. Get request line
       parse_request_line
-
-      # 2. Get request header
-      line = next_line
-      until line.chomp!.empty? do 
+      
+      line = @socket.gets
+      while line != "\n" do
         parse_header(line)
-        line = next_line
+        line = @socket.gets
       end
-      # 3. Get the body
-      parse_body
+
+      line = @socket.gets
+      while line != nil do
+        parse_body(line)
+        line = @socket.gets
+      end
+
+      @body[-1] = ""
     end
 
     # The following lines provide a suggestion for implementation - feel free
@@ -49,44 +51,33 @@ module WebServer
       @socket.gets
     end
 
-    def parse_request_line      
-      params = next_line.split(' ')
-      @http_method = params[0]
-      @uri = params[1][/.*\//]
-      @version = params[2]
-
-      # get uri paramas
-      if uri_params = params[1][/(?<=\?).*/]
-        name,value = uri_params.split('=')
-        @params[name] = value
+    def parse_request_line
+      line = next_line.split(" ")
+      @http_method = line[0]
+      @uri = line[1]
+      if line[1][1] == "?"
+        @uri = "/"
+        line[1] = line[1].tr("/?", "")
+        param = line[1].split("=")
+        @params[param[0]] = param[1]
       end
+      @version = line[2]
     end
 
     def parse_header(header_line)
-      params = header_line.strip.split(': ')
-      @headers[params[0].upcase.gsub('-', '_')] = params[1]
-    end
-
-    def parse_body
-      return unless (@headers['CONTENT_LENGTH']) && (@headers['CONTENT_LENGTH'].to_i != 0)
-      @body = @socket.read(@headers['CONTENT_LENGTH'].to_i)
-      if (@http_method == "POST")
-        params = @body.split('&')
-        params.each do |item|
-          name,value = item.split('=')
-          @params[name] = value
-        end
+      header = header_line.split(" ")
+      header[0] = header[0].tr(":", "")
+      header[0] = header[0].tr("-", "_")
+      header.each do |token|
+        @headers[header[0].upcase] = token.tr("\n", "")
       end
-
     end
 
-    def show
-      puts "HTTP METHOD:" + @http_method.inspect
-      puts "URI:" + @uri.inspect
-      puts "VERSION:" + @version.inspect
-      puts "HEADERS:" + @headers.inspect
-      puts "BODY:" + @body.inspect
-      puts "PARAMS:" + @params.inspect
+    def parse_body(body_line)
+       @body = @body + body_line
+    end
+
+    def parse_params
     end
   end
 end

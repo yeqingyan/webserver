@@ -2,80 +2,82 @@ require_relative 'configuration'
 
 # Parses, stores, and exposes the values from the httpd.conf file
 module WebServer
-
   class HttpdConf < Configuration
     def initialize(httpd_file_content)
-        super
-
         @config_hash = Hash.new
-        @config_hash['ScriptAlias'] = Hash.new
-        @config_hash['Alias'] = Hash.new
+        @script_alias_hash = Hash.new
+        @alias_hash = Hash.new
 
-        httpd_file_content.split("\n").each do |config_line| 
-            config_line.strip!
-            next if config_line.empty? || config_line[0] == '#'
-            name,value = config_line.split(' ', 2)
-            if name == "ScriptAlias"
-                alias_name,alias_value = value.split(' ', 2)
-                @config_hash['ScriptAlias'][alias_name] = alias_value.gsub(/["\n]/, '')
-            elsif name == 'Alias'
-                alias_name,alias_value = value.split(' ', 2)
-                @config_hash['Alias'][alias_name] = alias_value.gsub(/["\n]/, '')              
-            else
-                @config_hash[name] = value.gsub(/["\n]/, '')
-            end
+
+        @config_lines = httpd_file_content.split("\n")
+        @config_lines.each do |line|
+            next if line.strip.empty?
+            tokens = line.split(" ")
+                header = tokens[0].split("")
+                next if header[0] == "#"
+                if tokens[0] == "ScriptAlias"
+                    @script_alias_hash[tokens[1]] = tokens[2].tr("\"", "")
+                elsif tokens[0] == "Alias"
+                    @alias_hash[tokens[1]] = tokens[2].tr("\"", "")
+                else
+                    @config_hash[tokens[0]] = tokens[1].tr("\"", "")
+                end
         end
-
     end
 
     # Returns the value of the ServerRoot
-    def server_root 
-        @config_hash['ServerRoot']
+    def server_root
+        @config_hash["ServerRoot"]
     end
 
     # Returns the value of the DocumentRoot
     def document_root
-        @config_hash['DocumentRoot']
+        @config_hash["DocumentRoot"]
     end
 
     # Returns the directory index file
     def directory_index
-        @config_hash['DirectoryIndex']
+        @config_hash["DirectoryIndex"]
     end
 
     # Returns the *integer* value of Listen
     def port
-        @config_hash['Listen'].to_i
+        @config_hash["Listen"].to_i
     end
 
     # Returns the value of LogFile
     def log_file
-        @config_hash['LogFile']
+        @config_hash["LogFile"]
     end
 
     # Returns the name of the AccessFile 
     def access_file_name
-        @config_hash['AccessFileName']
+        @config_hash["AccessFileName"]
     end
 
     # Returns an array of ScriptAlias directories
     def script_aliases
-        @config_hash['ScriptAlias'].keys
+        @script_alias_hash.keys
     end
 
     # Returns the aliased path for a given ScriptAlias directory
     def script_alias_path(path)
-        @config_hash['ScriptAlias'][path]
+        @script_alias_hash[path]
     end
 
     # Returns an array of Alias directories
     def aliases
-        @config_hash['Alias'].keys
+        @alias_hash.keys
     end
 
     # Returns the aliased path for a given Alias directory
     def alias_path(path)
-        @config_hash['Alias'][path]
+        @alias_hash[path]
     end
   end
 end
+
+#conf = WebServer::HttpdConf.new("ServerRoot \"/Users/jrob/workspace/server/\"")
+#p conf.server_root
+
+#p "1234".to_i
