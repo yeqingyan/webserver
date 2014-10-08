@@ -28,7 +28,7 @@ module WebServer
     def self.default_headers
       {
         'Date' => Time.now.strftime('%a, %e %b %Y %H:%M:%S %Z'),
-        'Server' => 'John Roberts CSC 667'
+        'Server' => 'YEQING YAN CSC 867'
       }
     end
 
@@ -37,6 +37,8 @@ module WebServer
         case resource 
         when 200
           Response::Base.new(resource, options)
+        when 401
+          Response::Unauthorized.new(resource, options)
         when 403
           Response::Forbidden.new(resource, options)
         when 404

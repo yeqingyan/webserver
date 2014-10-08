@@ -92,12 +92,14 @@ module WebServer
     end
 
     def show
+      puts "----------------HTTP REQUEST DUMP BEGIN------------------------"
       puts "HTTP METHOD:" + @http_method.inspect
       puts "URI:" + @uri.inspect
       puts "VERSION:" + @version.inspect
       puts "HEADERS:" + @headers.inspect
       puts "BODY:" + @body.inspect
       puts "PARAMS:" + @params.inspect
+      puts "----------------HTTP REQUEST DUMP END--------------------------"
     end
   end
 end

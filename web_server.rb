@@ -45,33 +45,45 @@ module WebServer
 
         response = handle_message(request)
 
-        socket.print response.message
+        puts "---------- Response Message BEGIN -------------------"
+        puts response.header
+        puts "---------- Response Message END ---------------------"
+        socket.print response.to_s
         socket.close
     end
 
     def handle_message (request)
       response = ""
-      if (request.http_method == "GET")
+
+      case request.http_method
+      when "GET"
         response = send_resource(request)
-      elsif (request.http_method == "HEAD")
+      when "HEAD"
         response = generate_response(200, {})
-      else 
-        response = generate_response(404, {})
-      end
-          
+      when "POST"
+        response = generate_response(200, {})
+      when "PUT"
+        response = generate_response(200, {})
+      else
+        response = generate_response(404, {}) 
+      end                  
     end
 
     def send_resource (request)   
       resource = Resource.new(request, @httpd_conf, @mime_conf)
       if resource.protected?
+
+        return generate_response(401, {})
         # Return 403 if the resource is protected
-        return generate_response(403, {})
+        #return generate_response(403, {})
       else
         # Return 404 if file not exist
-        file_path = resource.resolve
-        puts "XXXXXXXXXXX" + file_path
+        file_path = resource.resolve_path
         return generate_response(404, {}) unless File.exist?(file_path)
+
+        puts "----------- RETURN FILE BEGIN ---------------------"
         puts "Server return file " + file_path
+        puts "----------- RETURN FILE END -----------------------"
 
         # Handle script and resource
         if resource.script_aliased?

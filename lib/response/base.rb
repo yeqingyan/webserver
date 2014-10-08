@@ -10,33 +10,34 @@ module WebServer
       attr_reader :version, :code, :body, :request
 
       def initialize(resource, options={})
-        @request = resource
-        
-        #if request.http_method == "GET"
-        #  get_uri(request.uri)
-        #else 
-        #  @body = ""
-        #end
         if options["BODY"]
           @body = options["BODY"]
         else
           @body = ""
         end
 
-        @code = 200
+        @code = resource
+
       end
 
       def to_s
-        
+        msg = header
+        msg += @body+"\n"
       end
 
-      def message
+      # Generate header
+      def header
         msg = ""
         msg += status_line(@code) + "\n"
         msg += entity_header
         msg += general_header
+        msg += response_header
         msg += "\n" 
-        msg += @body+"\n"
+        return msg
+      end
+
+      def message
+
       end
 
       def content_length
@@ -48,8 +49,6 @@ module WebServer
       # <entity-headers>
       # <empty-line>
       def status_line(code)
-        puts DEFAULT_HTTP_VERSION.inspect
-        puts RESPONSE_CODES[code]
         return DEFAULT_HTTP_VERSION + " " + code.to_s + " " + RESPONSE_CODES[code]
       end
 
@@ -58,17 +57,18 @@ module WebServer
         msg += f("Connection", GHEADERS["Connection"])
         msg += f('Date', Response::default_headers['Date'])
         msg += f('Server', Response::default_headers['Server']) 
-        msg
       end
 
+      # 
       def response_header
+        return ""
       end
 
       def entity_header
         msg = ""
         msg += f("Content-Type", CTYPE["DEFAULT"])
         msg += f("Content-Length", @body.bytesize) unless @body.empty?
-        msg
+        return msg
       end
 
       def f(string1, string2)

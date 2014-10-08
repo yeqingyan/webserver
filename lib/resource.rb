@@ -1,12 +1,34 @@
 module WebServer
 	class Resource
-		attr_reader :request, :conf, :mimes
+		# protected, script: they are the boolean to tell the path is protected or it is a script
+		# authconf: if resource is protected, authconf store the auth information.
+		# resolve_path: resolved path
+		attr_reader :request, :conf, :mimes, :protected, :authconf, :script, :resolve_path
 
 		def initialize(request, httpd_conf, mimes)
 			@request = request
 			@conf = httpd_conf
 			@mimes = mimes
+			@protected = false
+			@script = false
+			@authconf = {}
+			@resolve_path = ""
 
+			# Get resolved path
+			@resolve_path = resolve
+			
+			# protected or not
+			if File.directory?(@resolve_path)
+				file_dir = @resolve_path
+			else
+				file_dir = File.dirname(@resolve_path)
+
+			auth_filepath = File.join(file_dir, ".htaccess");
+			if File.exist?(auth_filepath) || (@resolve_path["protected"].nil?)
+				@protected = true
+				auth_file = File.open(auth_filepath);
+				@authconf = AuthConf.new(auth_file.read)
+			end
 		end
 
 		def resolve
@@ -24,6 +46,7 @@ module WebServer
 	    	# let's assume the script directory is under the document_root
 	    	unless @conf.script_aliases.empty?
 	    		@conf.script_aliases.each do |name|
+	    			@script = true if resolve_string[name]
 	    			resolve_string.gsub!(name, @conf.script_alias_path(name))
 	    		end
 	    	end
@@ -37,23 +60,15 @@ module WebServer
 	    end
 
 	    def script_aliased?
-
-	    	false unless @conf.script_aliases
-
-	    	@conf.script_aliases.each do |name|
-	    		if @request.uri[name]
-	    			return true
-	    		end
-	    	end
-	    	false
+			@script
 	    end
 
 	    def protected?
-	    	!@request.uri["protected"].nil?
+			@protected
 	    end
 		
 		def authorized?(userinfo)
-			if protected?
+			if @protected
 				(userinfo[:username] == "valid_name") && (userinfo[:password] == "valid_pwd")
 			else
 				true
