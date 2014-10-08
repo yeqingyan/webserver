@@ -50,8 +50,10 @@ module WebServer
       @socket.gets
     end
 
-    def parse_request_line      
-      params = next_line.split(' ')
+    def parse_request_line  
+      line = next_line
+      raise "GET NULL" if line.nil?    
+      params = line.split(' ')
       puts params.inspect
       @http_method = params[0]
 

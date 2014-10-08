@@ -77,5 +77,10 @@ module WebServer
     def alias_path(path)
         @config_hash['Alias'][path]
     end
+
+    def access_file
+        return "" if @config_hash['AccessFileName'] == nil
+        return @config_hash['AccessFileName']
+    end
   end
 end

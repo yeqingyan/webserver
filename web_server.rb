@@ -2,6 +2,7 @@ require 'socket'
 Dir.glob('lib/**/*.rb').each do |file|
   require file
 end
+require 'ruby-debug'
 
 module WebServer
   class Server
@@ -25,9 +26,11 @@ module WebServer
       server = TCPServer.new('localhost', @httpd_conf.port)
 
 
-      while true do 
-        socket = server.accept
-        thread = Thread.new{ worker(socket) }
+      loop do
+        Thread.start(server.accept) do |client|
+          worker(client)
+          client.close
+        end
       end
 
       # Close the socket, terminating the connection
@@ -49,7 +52,6 @@ module WebServer
         puts response.header
         puts "---------- Response Message END ---------------------"
         socket.print response.to_s
-        socket.close
     end
 
     def handle_message (request)
@@ -71,9 +73,9 @@ module WebServer
 
     def send_resource (request)   
       resource = Resource.new(request, @httpd_conf, @mime_conf)
-      if resource.protected?
+      if resource.protected? && (resource.authorized?(request.headers['AUTHORIZATION']) == false)
 
-        return generate_response(401, {})
+        return generate_response(401, {'TYPE' => resource.auth_type, 'REALM' => resource.auth_realm})
         # Return 403 if the resource is protected
         #return generate_response(403, {})
       else

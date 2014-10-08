@@ -4,11 +4,12 @@ module WebServer
     class Unauthorized < Base
       def initialize(resource, options={})
       	super
+        @options = options
       end
 
       def response_header
       	msg = ""
-      	msg += f("WWW-Authenticate", "Basic realm=\"TEST\"")
+      	msg += "WWW-Authenticate: %s realm=%s\n" % [@options['TYPE'], @options['REALM']]
       end
   end
 

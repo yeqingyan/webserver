@@ -11,7 +11,7 @@ module WebServer
 			@mimes = mimes
 			@protected = false
 			@script = false
-			@authconf = {}
+			@authconf = nil
 			@resolve_path = ""
 
 			# Get resolved path
@@ -22,9 +22,10 @@ module WebServer
 				file_dir = @resolve_path
 			else
 				file_dir = File.dirname(@resolve_path)
+			end
 
-			auth_filepath = File.join(file_dir, ".htaccess");
-			if File.exist?(auth_filepath) || (@resolve_path["protected"].nil?)
+			auth_filepath = File.join(file_dir, httpd_conf.access_file);
+			if File.exist?(auth_filepath) && (!@resolve_path["protected"].nil?)
 				@protected = true
 				auth_file = File.open(auth_filepath);
 				@authconf = AuthConf.new(auth_file.read)
@@ -68,11 +69,26 @@ module WebServer
 	    end
 		
 		def authorized?(userinfo)
+			puts "authorized "+ userinfo.inspect
 			if @protected
-				(userinfo[:username] == "valid_name") && (userinfo[:password] == "valid_pwd")
+				if userinfo.nil?
+					return false
+				else
+					return authconf.user_match?(userinfo)
+				end
 			else
-				true
+				return false
 			end
+		end
+
+		def auth_type
+			raise "AuthConf is NULL!" if @authconf == nil
+			@authconf.auth_type
+		end
+
+		def auth_realm
+			raise "AuthConf is NULL!" if @authconf == nil
+			@authconf.auth_name
 		end
 	end
 end
