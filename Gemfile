@@ -2,6 +2,7 @@ source 'https://rubygems.org'
 
 gem 'rspec'
 gem 'fuubar'
+gem 'test_construct'
 
 # Added by YEQING YAN
 # For webpage test

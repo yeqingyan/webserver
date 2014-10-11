@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'test_construct/rspec_integration'
 
 describe WebServer::Resource do
   let(:mimes) { double(WebServer::MimeTypes) }
@@ -20,9 +21,14 @@ describe WebServer::Resource do
     })
   end
 
-  def protect_directory(directory_path, should_protect)
-    File.stub(:exists?).and_return(false)
-    File.stub(:exists?).with(directory_path).and_return(should_protect)
+  def protect_directory(directory_path)
+    within_construct do |construct|
+      construct.directory directory_path do |directory|
+        directory.file access_file, htaccess_content
+
+        yield
+      end
+    end
   end
 
   describe '#resolve' do
@@ -52,7 +58,7 @@ describe WebServer::Resource do
       let(:request) { request_double(uri: '/ss/ss/resource.php') }
 
       it 'should return the absolute path to the file' do
-        expected_path = '/doc_root/tt/tt/tt/resource.php'
+        expected_path = '/tt/tt/tt/resource.php'
         expect(WebServer::Resource.new(request, conf, mimes).resolve).to eq expected_path
       end
     end
@@ -67,7 +73,7 @@ describe WebServer::Resource do
       let(:request) { request_double(uri: '/aa/aa/resource') }
 
       it 'should return the absolute path to the file' do
-        expected_path = '/doc_root/bb/bb/bb/resource/index.html'
+        expected_path = '/bb/bb/bb/resource/index.html'
         expect(WebServer::Resource.new(request, conf, mimes).resolve).to eq expected_path
       end
     end
@@ -94,63 +100,24 @@ describe WebServer::Resource do
   end
 
   describe '#protected?' do
-    let(:conf) { conf_double(access_file_name: '.test_access_file', aliases: [], script_aliases: []) }
+    let(:conf) { conf_double(access_file_name: access_file, aliases: [], script_aliases: []) }
 
     context 'when resource is in protected directory' do
-      let(:request) { request_double(uri: '/protected/dir/resource.html') }
-
-      before :each do
-        protect_directory access_file_path, true
-      end
+      let(:protected_directory) { '/protected/dir' }
+      let(:request) { request_double(uri: "#{protected_directory}/resource.html") }
 
       it 'returns true' do
-        expect(WebServer::Resource.new(request, conf, mimes).protected?).to be_true
+        protect_directory protected_directory do
+          expect(WebServer::Resource.new(request, conf, mimes).protected?).to be_true
+        end
       end
     end
  
     context 'when unprotected directory' do
       let(:request) { request_double(uri: '/a/resource') }
 
-      before :each do
-        protect_directory access_file_path, false
-      end
-
       it 'returns false' do
         expect(WebServer::Resource.new(request, conf, mimes).protected?).to eq false
-      end
-    end
-  end
-
-  describe '#authorized?' do
-    let(:conf) { conf_double(access_file_name: access_file, aliases: [], script_aliases: []) }
-    let(:invalid_credentials) { {username: 'invalid_name', password: 'invalid_pwd'} }
-
-    context 'when resource is in protected directory' do 
-      let(:request) { request_double(uri: '/protected/dir/resource.html') }
-      let(:valid_credentials) { {username: 'valid_name', password: 'valid_pwd'} }
-
-      before :each do
-        protect_directory access_file_path, true
-      end
-
-      it 'returns true if valid credentials supplied' do
-        expect(WebServer::Resource.new(request, conf, mimes).authorized?(valid_credentials)).to be_true
-      end
-
-      it 'returns false if invalid credentials supplied' do
-        expect(WebServer::Resource.new(request, conf, mimes).authorized?(invalid_credentials)).to be_false
-      end
-    end
-
-    context 'when unprotected directory' do
-      let(:request) { request_double(uri: '/a/resource') }
-
-      before :each do
-        protect_directory access_file_path, false
-      end
-
-      it 'returns true' do
-        expect(WebServer::Resource.new(request, conf, mimes).authorized?(invalid_credentials)).to be_true
       end
     end
   end
