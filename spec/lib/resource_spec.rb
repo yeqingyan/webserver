@@ -60,6 +60,7 @@ describe WebServer::Resource do
     context 'for an aliased path' do
       let(:conf) do 
         object = conf_double
+        object.stub(:script_aliases).and_return []
         object.stub(:aliases).and_return ['/aa/aa']
         object.stub(:alias_path).and_return('/bb/bb/bb')
         object
@@ -75,7 +76,9 @@ describe WebServer::Resource do
 
   describe '#script_aliased?' do
     context 'for a script aliased path' do
-      let(:conf) { conf_double(script_aliases: ['/ss/ss'], script_alias_path: '/tt/tt/tt') }
+      let(:conf) { conf_double(script_aliases: ['/ss/ss'], script_alias_path: '/tt/tt/tt', aliases: [])}
+       #bject.stub(:aliases).and_return ['/aa/aa']
+
       let(:request) { request_double(uri: '/ss/ss/resource') }
 
       it 'returns true' do
@@ -84,7 +87,7 @@ describe WebServer::Resource do
     end
 
     context 'for a non script aliased path' do
-      let(:conf) { conf_double(script_aliases: []) }
+      let(:conf) { conf_double(script_aliases: [], aliases: [])}
       let(:request) { request_double(uri: '/a/resource') }
 
       it 'returns false for a non script aliased path' do

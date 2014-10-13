@@ -7,11 +7,14 @@ module WebServer
    		
    		@config_hash = {"random" => "text/plain"}
 
-   		mime_file_content.split("\n").each do |config_line| 
+   		mime_file_content.split("\n").each do |config_line|
+        #p config_line 
    			config_line.strip!
    			next if config_line.empty? || config_line[0] == '#'
    			type,ext = config_line.split(' ', 2)
+        next if ext == nil
    			if ext.split.is_a?(String)
+
    				@config_hash[ext] = type
    			else
    				ext.split(' ').each do |item|
@@ -28,3 +31,12 @@ module WebServer
   end
 end
 
+<<<<<<< HEAD
+=begin
+@mime_file = File.new("/home/jacob/667_workspace/server-project-o/config/mime.types")
+@mime = WebServer::MimeTypes.new(@mime_file.read)
+
+p @mime.for_extension("dms")
+=end
+=======
+>>>>>>> 1d40e793febdaa664aa8c0fb4be8bbdf9f984c61
