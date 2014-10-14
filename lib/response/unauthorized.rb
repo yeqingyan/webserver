@@ -9,10 +9,8 @@ module WebServer
 
       def response_header
       	msg = ""
-      	msg += "WWW-Authenticate: %s realm=%s\n" % [@options['TYPE'], @options['REALM']]
+      	msg += "WWW-Authenticate: %s realm=\"%s\"\n" % [@options['TYPE'], @options['REALM']]
       end
-  end
-
-
+    end
   end
 end

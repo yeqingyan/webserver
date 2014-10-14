@@ -20,15 +20,14 @@ module WebServer
       'Connection' => 'close'
     }
 
-    # Content type
-    CTYPE = {
-      'DEFAULT' => 'text/html'
-    }
-
     def self.default_headers
       {
-        'Date' => Time.now.strftime('%a, %e %b %Y %H:%M:%S %Z'),
-        'Server' => 'YEQING YAN CSC 867'
+        # Use GMT time for date and expire
+        'Date' => Time.now.gmtime.strftime('%a, %e %b %Y %H:%M:%S %Z'),
+        'Server' => 'YEQING YAN CSC 867',
+        # expire time is 1 day
+        'Expires' => (Time.now.gmtime + (24*60*60)).strftime('%a, %e %b %Y %H:%M:%S %Z')
+
       }
     end
 
@@ -37,12 +36,20 @@ module WebServer
         case resource 
         when 200
           Response::Base.new(resource, options)
+        when 201
+          Response::SuccessfullyCreated.new(resource, options)
+        when 304
+          Response::NotModified.new(resource, options)
+        when 400
+          Response::BadRequest.new(resource, options)
         when 401
           Response::Unauthorized.new(resource, options)
         when 403
           Response::Forbidden.new(resource, options)
         when 404
           Response::NotFound.new(resource, options)
+        when 500
+          Response::ServerError.new(resource, options)
         end
       end
 

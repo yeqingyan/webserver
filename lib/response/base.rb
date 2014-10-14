@@ -7,13 +7,25 @@ module WebServer
     # By YEQING YAN 
     # Base is 200
     class Base
-      attr_reader :version, :code, :body, :request
+      attr_reader :version, :code, :body, :request, :age, :mtime, :type
 
       def initialize(resource, options={})
-        if options["BODY"]
-          @body = options["BODY"]
+        if options['BODY']
+          @body = options['BODY']
         else
-          @body = ""
+          @body = ''
+        end
+
+        if options['AGE']
+          @age = options['AGE']
+        end
+
+        if options['LAST_MODIFIED']
+          @mtime = options['LAST_MODIFIED']
+        end
+
+        if options['TYPE']
+          @type = options['TYPE'].split('.')[1]
         end
 
         @code = resource
@@ -57,6 +69,10 @@ module WebServer
         msg += f("Connection", GHEADERS["Connection"])
         msg += f('Date', Response::default_headers['Date'])
         msg += f('Server', Response::default_headers['Server']) 
+        msg += f('Expires', Response::default_headers['Expires']) 
+        #msg += f('Age', @age) unless @age.nil?
+        msg += f('Last-Modified', @mtime) unless @mtime.nil?
+        return msg
       end
 
       # 
@@ -66,8 +82,17 @@ module WebServer
 
       def entity_header
         msg = ""
-        msg += f("Content-Type", CTYPE["DEFAULT"])
-        msg += f("Content-Length", @body.bytesize) unless @body.empty?
+        if @type.nil?         
+          msg += f("Content-Type", $mime_conf.for_extension('random'))
+        else
+          msg += f("Content-Type", $mime_conf.for_extension(@type))
+        end
+        
+        if @body.empty?
+          msg += f("Content-Length", 0)
+        else
+          msg += f("Content-Length", @body.bytesize)
+        end
         return msg
       end
 
