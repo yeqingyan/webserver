@@ -24,8 +24,8 @@ module WebServer
 				file_dir = File.dirname(@resolve_path)
 			end
 
-			auth_filepath = File.join(file_dir, httpd_conf.access_file);
-			if File.exist?(auth_filepath) && (!@resolve_path["protected"].nil?)
+			auth_filepath = File.join(file_dir, httpd_conf.access_file_name);
+			if File.exist?(auth_filepath)
 				@protected = true
 				auth_file = File.open(auth_filepath);
 				@authconf = Htaccess.new(auth_file.read)
