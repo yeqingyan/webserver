@@ -31,12 +31,9 @@ module WebServer
   end
 end
 
-<<<<<<< HEAD
 =begin
 @mime_file = File.new("/home/jacob/667_workspace/server-project-o/config/mime.types")
 @mime = WebServer::MimeTypes.new(@mime_file.read)
 
 p @mime.for_extension("dms")
 =end
-=======
->>>>>>> 1d40e793febdaa664aa8c0fb4be8bbdf9f984c61

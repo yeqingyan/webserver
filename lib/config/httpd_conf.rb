@@ -16,7 +16,7 @@ module WebServer
                 header = tokens[0].split("")
                 next if header[0] == "#"
                 if tokens[0] == "ScriptAlias"
-                    @script_alias_hash[tokens[1]] = tokens[2].tr("\"", "")
+                    @script_alias_hash[tokens[1]] = tokens[2].tr('"', "")
                 elsif tokens[0] == "Alias"
                     @alias_hash[tokens[1]] = tokens[2].tr("\"", "")
                 else
