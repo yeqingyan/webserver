@@ -55,7 +55,8 @@ module WebServer
 
     # Returns the name of the AccessFile 
     def access_file_name
-        @config_hash['AccessFileName']
+        return "" if @config_hash['AccessFileName'] == nil
+        return @config_hash['AccessFileName']
     end
 
     # Returns an array of ScriptAlias directories
@@ -78,9 +79,5 @@ module WebServer
         @config_hash['Alias'][path]
     end
 
-    def access_file
-        return "" if @config_hash['AccessFileName'] == nil
-        return @config_hash['AccessFileName']
-    end
   end
 end
