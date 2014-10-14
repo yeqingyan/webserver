@@ -107,5 +107,8 @@ module WebServer
       msg += "----------------HTTP REQUEST DUMP END--------------------------\n"
       return msg
     end
+
+    def parse_params
+    end
   end
 end

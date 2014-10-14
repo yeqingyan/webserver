@@ -6,7 +6,6 @@ describe WebServer::MimeTypes do
 # This is a comment followed by a blank line
 
 image/png     png
-
 image/jpeg    jpeg jpg jpe
     FILE_CONTENT
   end
