@@ -33,7 +33,7 @@ describe WebServer::Resource do
 
   describe '#resolve' do
     context 'for an unaliased path' do
-      let(:conf) do 
+      let(:conf) do
         object = conf_double
         object.stub(:aliases).and_return []
         object.stub(:script_aliases).and_return []
@@ -66,7 +66,7 @@ describe WebServer::Resource do
     end
 
     context 'for an aliased path' do
-      let(:conf) do 
+      let(:conf) do
         object = conf_double
         object.stub(:aliases).and_return ['/aa/aa']
         object.stub(:alias_path).and_return('/bb/bb/bb')
@@ -107,7 +107,7 @@ describe WebServer::Resource do
     let(:conf) { conf_double(access_file_name: access_file, aliases: [], script_aliases: []) }
 
     context 'when resource is in protected directory' do
-      let(:protected_directory) { '/protected/dir' }
+      let(:protected_directory) { `pwd` }
       let(:request) { request_double(uri: "#{protected_directory}/resource.html") }
 
       it 'returns true' do
@@ -116,7 +116,7 @@ describe WebServer::Resource do
         end
       end
     end
- 
+
     context 'when unprotected directory' do
       let(:request) { request_double(uri: '/a/resource') }
 
