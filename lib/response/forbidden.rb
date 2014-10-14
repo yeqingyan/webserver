@@ -4,8 +4,8 @@ module WebServer
     class Forbidden < Base
       def initialize(resource, options={})
         @request = resource
-      	@code = 403
-      	@body = @code.to_s + " " + RESPONSE_CODES[@code]
+        @code = 403
+        @body = @code.to_s + " " + RESPONSE_CODES[@code]
       end
     end
   end

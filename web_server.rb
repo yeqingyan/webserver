@@ -41,8 +41,6 @@ module WebServer
     end
     private
   end
-
-
 end
 
 WebServer::Server.new.start
