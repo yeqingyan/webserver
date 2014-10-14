@@ -1,8 +1,6 @@
 $: << '../'
 Dir.glob('lib/**/*.rb').each {|f| require f}
 
-FIXTURES_DIRECTORY = File.join File.dirname(__FILE__), 'fixtures'
-
 # A link to some handy testing guidelines: http://betterspecs.org/
 RSpec.configure do |config|
   # Use color in STDOUT
