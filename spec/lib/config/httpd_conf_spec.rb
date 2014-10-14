@@ -3,18 +3,18 @@ require 'spec_helper'
 describe WebServer::HttpdConf do
   let(:httpd_content) do
     <<-FILE_CONTENT
-# This is a comment followed by a blank line
-
-ServerRoot   "server_root/with/path"
-DocumentRoot "document_root"
-Listen 1234
-LogFile "log_file"
-ScriptAlias /script_alias/ "script/alias/directory"
-ScriptAlias /script_alias_2/ "script/alias/directory"
-Alias /ab/ "alias/public_html/ab1/ab2/"
-Alias /~traciely/ "server/public_html/"
-DirectoryIndex i.html
-AccessFileName access_file
+      # This is a comment followed by a blank line
+      
+      ServerRoot   "server_root/with/path"
+      DocumentRoot "document_root"
+      Listen 1234
+      LogFile "log_file"
+      ScriptAlias /script_alias/ "script/alias/directory"
+      ScriptAlias /script_alias_2/ "script/alias/directory"
+      Alias /ab/ "alias/public_html/ab1/ab2/"
+      Alias /~traciely/ "server/public_html/"
+      DirectoryIndex i.html
+      AccessFileName access_file
     FILE_CONTENT
   end
   let(:httpd_file) { WebServer::HttpdConf.new(httpd_content) }
