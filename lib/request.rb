@@ -40,8 +40,7 @@ module WebServer
         line = next_line
       end
       # 3. Get the body
-      parse_body
-      show
+      parse_body      
     end
 
     # The following lines provide a suggestion for implementation - feel free
@@ -50,11 +49,14 @@ module WebServer
       @socket.gets
     end
 
-    def parse_request_line  
+    def parse_request_line
+ 
       line = next_line
-      raise "GET NULL" if line.nil?    
+      while (line.nil?) || (line.chomp!.empty?) do  
+        line = next_line
+      end
+ 
       params = line.split(' ')
-      puts params.inspect
       @http_method = params[0]
 
       # analysis URI format 
@@ -94,14 +96,16 @@ module WebServer
     end
 
     def show
-      puts "----------------HTTP REQUEST DUMP BEGIN------------------------"
-      puts "HTTP METHOD:" + @http_method.inspect
-      puts "URI:" + @uri.inspect
-      puts "VERSION:" + @version.inspect
-      puts "HEADERS:" + @headers.inspect
-      puts "BODY:" + @body.inspect
-      puts "PARAMS:" + @params.inspect
-      puts "----------------HTTP REQUEST DUMP END--------------------------"
+      msg =''
+      msg += "----------------HTTP REQUEST DUMP BEGIN------------------------\n"
+      msg += "HTTP METHOD:" + @http_method.inspect + "\n"
+      msg += "URI:" + @uri.inspect + "\n"
+      msg += "VERSION:" + @version.inspect + "\n"
+      msg += "HEADERS:" + @headers.inspect + "\n"
+      msg += "BODY:" + @body.inspect + "\n"
+      msg += "PARAMS:" + @params.inspect + "\n"
+      msg += "----------------HTTP REQUEST DUMP END--------------------------\n"
+      return msg
     end
   end
 end
