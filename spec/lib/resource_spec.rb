@@ -24,8 +24,7 @@ describe WebServer::Resource do
   def protect_directory(directory_path)
     within_construct do |construct|
       construct.directory directory_path do |directory|
-        directory.file access_file, htaccess_content
-
+        directory.file access_file, ''
         yield
       end
     end
@@ -37,6 +36,8 @@ describe WebServer::Resource do
         object = conf_double
         object.stub(:aliases).and_return []
         object.stub(:script_aliases).and_return []
+        # Add stub function by YEQING YAN to pass test
+        object.stub(:access_file).and_return ""
         object
       end
       let(:request) { request_double(uri: '/a/resource') }
@@ -53,6 +54,7 @@ describe WebServer::Resource do
         object.stub(:aliases).and_return []
         object.stub(:script_aliases).and_return ['/ss/ss']
         object.stub(:script_alias_path).and_return '/tt/tt/tt'
+        object.stub(:access_file).and_return ""
         object
       end
       let(:request) { request_double(uri: '/ss/ss/resource.php') }
@@ -68,6 +70,8 @@ describe WebServer::Resource do
         object = conf_double
         object.stub(:aliases).and_return ['/aa/aa']
         object.stub(:alias_path).and_return('/bb/bb/bb')
+        object.stub(:access_file).and_return ""
+        object.stub(:script_aliases).and_return []
         object
       end
       let(:request) { request_double(uri: '/aa/aa/resource') }
@@ -81,7 +85,7 @@ describe WebServer::Resource do
 
   describe '#script_aliased?' do
     context 'for a script aliased path' do
-      let(:conf) { conf_double(script_aliases: ['/ss/ss'], script_alias_path: '/tt/tt/tt') }
+      let(:conf) { conf_double(script_aliases: ['/ss/ss'], script_alias_path: '/tt/tt/tt', access_file: "", aliases: []) }
       let(:request) { request_double(uri: '/ss/ss/resource') }
 
       it 'returns true' do
@@ -90,7 +94,7 @@ describe WebServer::Resource do
     end
 
     context 'for a non script aliased path' do
-      let(:conf) { conf_double(script_aliases: []) }
+      let(:conf) { conf_double(script_aliases: [], aliases: [], access_file: "") }
       let(:request) { request_double(uri: '/a/resource') }
 
       it 'returns false for a non script aliased path' do
@@ -100,10 +104,10 @@ describe WebServer::Resource do
   end
 
   describe '#protected?' do
-    let(:conf) { conf_double(access_file_name: access_file, aliases: [], script_aliases: []) }
+    let(:conf) { conf_double(access_file_name: access_file, aliases: [], script_aliases: [], access_file: "") }
 
     context 'when resource is in protected directory' do
-      let(:protected_directory) { '/protected/dir' }
+      let(:protected_directory) { 'protected/dir' }
       let(:request) { request_double(uri: "#{protected_directory}/resource.html") }
 
       it 'returns true' do
