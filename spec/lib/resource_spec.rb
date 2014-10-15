@@ -4,7 +4,7 @@ require 'test_construct/rspec_integration'
 describe WebServer::Resource do
   let(:mimes) { double(WebServer::MimeTypes) }
   let(:access_file) { '.test_access_file' }
-  let(:test_doc_root) { '/doc_root' }
+  let(:test_doc_root) { working_dir = `pwd`; working_dir.slice(0, working_dir.length-1) }
   let(:access_file_path) { "#{test_doc_root}/protected/#{access_file}" }
 
   def conf_double(options={})
@@ -107,8 +107,8 @@ describe WebServer::Resource do
     let(:conf) { conf_double(access_file_name: access_file, aliases: [], script_aliases: []) }
 
     context 'when resource is in protected directory' do
-      let(:protected_directory) { `pwd` }
-      let(:request) { request_double(uri: "#{protected_directory}/resource.html") }
+      let(:protected_directory) { File.join test_doc_root,"protected" }
+      let(:request) { request_double(uri: "/protected/resource.html") }
 
       it 'returns true' do
         protect_directory protected_directory do

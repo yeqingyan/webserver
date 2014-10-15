@@ -12,36 +12,20 @@ module WebServer
       @protected = false
       @script = false
       @authconf = nil
-      @resolve_path = ""
 
-      # Get resolved path
-      @resolve_path = resolve
-      
-      # protected or not
-      if File.directory?(@resolve_path)
-        file_dir = @resolve_path
-      else
-        file_dir = File.dirname(@resolve_path)
-      end
+      resolve      
+      protected?
 
-      auth_filepath = File.join(file_dir, httpd_conf.access_file_name);
-      if File.exist?(auth_filepath)
-        @protected = true
-        auth_file = File.open(auth_filepath);
-        @authconf = Htaccess.new(auth_file.read)
-      end
     end
 
     def resolve
+      @resolve_path ||= begin
 
-        # check if uri is script
         check_script(@request.uri)
         check_alias(@request.uri)
 
-        # Do not add directory_index if uri end with .abc
+        # replace script path
         if script_aliased?
-          # script_aliases replace
-          # do not add directory_index if the uri is script
           resolve_string = @request.uri
           @conf.script_aliases.each do |name|
             resolve_string.gsub!(name, @conf.script_alias_path(name))
@@ -60,24 +44,46 @@ module WebServer
               resolve_string.gsub!(name, @conf.alias_path(name))
             end
           else
+            # add document root to the head of the file
+            puts @conf.document_root
             resolve_string = File.join(@conf.document_root, resolve_string)
           end
         end
-        return resolve_string
-      end
 
-      def script_aliased?
+        resolve_string
+      end
+    end
+
+    def script_aliased?
       @script
-      end
+    end
 
-      def alias_aliased?
-        @alias
-      end
+    def alias_aliased?
+      @alias
+    end
 
-      def protected?
-      @protected
+    def protected?
+      @protected ||= begin
+        @protected = false
+
+        # check access file
+        if File.directory?(@resolve_path)
+          file_dir = @resolve_path
+        else
+          file_dir = File.dirname(@resolve_path)
+        end
+
+        file_dir = file_dir.gsub("\n", '')
+        auth_filepath = File.join(file_dir, @conf.access_file_name);
+        if File.exist?(auth_filepath)
+          @protected = true
+          auth_file = File.open(auth_filepath);
+          @authconf = Htaccess.new(auth_file.read)
+        end
+        @protected
       end
-    
+    end
+
     def authorized?(userinfo)
       puts "authorized "+ userinfo.inspect
       if @protected

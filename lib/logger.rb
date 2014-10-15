@@ -15,11 +15,11 @@ module WebServer
             @echo = options['ECHO']
         end
 
-        # create dir
         logdir = File.dirname(log_file_path)
         unless File.directory?(logdir)
           FileUtils.mkdir_p(logdir)
         end
+        
         @log_file = File.open(log_file_path, 'w')
     end
 

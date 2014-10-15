@@ -19,6 +19,7 @@ module WebServer
           response = handle_message(request)
           $logger.log(request, response)
           @socket.print response.to_s
+          # respond 500 if meet exception
         rescue => exception
           STDERR.puts "GOT ERROR!"
           puts exception.backtrace
@@ -58,10 +59,6 @@ module WebServer
             # Return 404 if file not exist
             file_path = resource.resolve_path
             return generate_response(404, {}) unless File.exist?(file_path)
-
-            puts "----------- RETURN FILE BEGIN ---------------------"
-            puts "Server return file " + file_path
-            puts "----------- RETURN FILE END -----------------------"
 
             # Handle script and resource
             if resource.script_aliased?
