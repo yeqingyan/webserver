@@ -6,45 +6,44 @@ module WebServer
       @request = request
       @conf = httpd_conf
       @mimes = mimes
+      @script = false
 
       resource = resolve
     end
 
     def resolve
-    	resolve_string = @conf.document_root + @request.uri
- 
-        if !@conf.script_aliases.empty? 
+    	unless @request.uri == "/"
+            resolve_string = @conf.document_root + @request.uri
+        else
+            resolve_string = @conf.document_root + @conf.directory_index
+        end
+
+        unless @conf.script_aliases.empty? 
     		@conf.script_aliases.each do |path|
-    			resolve_string.gsub!(path, @conf.script_alias_path(path))
+    			if resolve_string.gsub!(path, @conf.script_alias_path(path))
+                    @script = true;
+                end
     		end
         end
     	
-    	if !@conf.aliases.empty?
+    	unless @conf.aliases.empty?
     		@conf.aliases.each do |path|
     			resolve_string.gsub!(path, @conf.alias_path(path))
-                resolve_string = resolve_string + "/" + @conf.directory_index
-    		end
+            end
     	end
 
-    	if !script_aliased? && @conf.aliases.empty?
-    		resolve_string = @conf.document_root + @request.uri + "/" + @conf.directory_index
-    	end
-
+    	#if @request.uri == "/" || !script_aliased?
+         #   resolve_string = resolve_string + @conf.directory_index
+        #end
+        if resolve_string[-1] == "/"
+            resolve_string = resolve_string + @conf.directory_index
+        end
+        resolve_string.gsub!("//", "/")
     	resolve_string
     end
 
     def script_aliased?
-        if @conf.script_aliases.empty?
-           return false
-        else
-            @conf.script_aliases.each do |path|
-                if @request.uri[path] = path
-                    return true
-                end
-            end 
-        end
-
-        return false
+        @script
     end
 
     def protected?

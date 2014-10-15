@@ -11,13 +11,13 @@ module WebServer
     def initialize(options={})
       # Set up WebServer's configuration files and logger here
       @conf_file = File.new("config/httpd.conf")
-      @conf = WebServer::HttpdConf.new(@conf_file.read)
+      $conf = WebServer::HttpdConf.new(@conf_file.read)
       @mime_file = File.new("config/mime.types")
-      @mime = WebServer::MimeTypes.new(@mime_file.read)
+      $mime = WebServer::MimeTypes.new(@mime_file.read)
 
       # Do any preparation necessary to allow threading multiple requests
-      @server = TCPServer.new("localhost", @conf.port)
-      p "Listening to localhost: " + @conf.port.to_s
+      @server = TCPServer.new("localhost", $conf.port)
+      p "Listening to localhost: " + $conf.port.to_s
     end
 
     def start
@@ -27,8 +27,8 @@ module WebServer
       # processing the requests as connections are made
       loop do
         Thread.start(@server.accept) do |client|
-          worker = WebServer::Worker.new(client, nil)
-          client.puts "Hello"
+          worker = WebServer::Worker.new(client, @server)
+          # client.puts "Hello"
           client.close
         end
       end

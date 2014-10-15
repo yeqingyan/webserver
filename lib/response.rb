@@ -23,8 +23,11 @@ module WebServer
     end
 
     module Factory
-      def self.create(resource)
-        Response::Base.new(resource)
+      def self.create(resource, options)
+        case resource
+        when 200
+          Response::Base.new(resource, options)
+        end
       end
 
       def self.error(resource, error_object)

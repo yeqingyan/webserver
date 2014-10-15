@@ -30,19 +30,13 @@ module WebServer
     def parse
       parse_request_line
       
-      line = @socket.gets
-      while line != "\n" do
-        parse_header(line)
-        line = @socket.gets
+      line = next_line
+      while line != "\n" && line !="\r\n" do
+        parse_header(line.tr("\r", ""))
+        line = next_line
       end
 
-      line = @socket.gets
-      while line != nil do
-        parse_body(line)
-        line = @socket.gets
-      end
-
-      @body[-1] = ""
+      parse_body
     end
 
     # The following lines provide a suggestion for implementation - feel free
@@ -73,8 +67,9 @@ module WebServer
       end
     end
 
-    def parse_body(body_line)
-       @body = @body + body_line
+    def parse_body
+      return unless (@headers["CONTENT_LENGTH"]) && (@headers["CONTENT_LENGTH"].to_i) != 0
+      @body = @socket.read(@headers["CONTENT_LENGTH"].to_i)
     end
 
     def parse_params

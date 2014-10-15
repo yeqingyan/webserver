@@ -7,6 +7,12 @@ module WebServer
       attr_reader :version, :code, :body
 
       def initialize(resource, options={})
+        code = resource
+        
+        if options["BODY"]
+          @body = options["BODY"]
+        end
+
       end
 
       def to_s
