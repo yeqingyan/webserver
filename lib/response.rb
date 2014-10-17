@@ -36,6 +36,8 @@ module WebServer
           return "POST"
         when "PUT"
           return "PUT"
+        else
+          return Response::BadRequest.new(resource, options)
         end
         
         options = Hash.new
@@ -45,12 +47,18 @@ module WebServer
         when 200
           options['BODY'] = resource.resolve
           Response::Base.new(resource, options)
+        when 201
+          Response::SuccessfullyCreated.new(resource, options)
+        when 304
+          Response::NotModified.new(resource, options)
         when 401
           Response::Unauthorized.new(resource, options)
         when 403
           Response::Forbidden.new(resource, options)
         when 404
           Response::NotFound.new(resource, options)
+        when 500
+          Response::ServerError.new(resource, options)
         end
       end
 
@@ -67,6 +75,14 @@ module WebServer
 
         path = resource.resolve
         @code = 404 unless File.exists?(path)
+
+        #304 simple caching
+        if resource.request.headers["IF_MODIFIED_SINCE"]
+          time = resource.request.headers["IF_MODIFIED_SINCE"].tr("\n", "")
+          if time == File.mtime(resource.resolve).gmtime.strftime("%a, %e %b %Y %H:%M:%S %Z")
+            @code = 304
+          end
+        end
       end
     end
   end

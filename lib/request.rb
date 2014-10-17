@@ -59,11 +59,20 @@ module WebServer
     end
 
     def parse_header(header_line)
-      header = header_line.split(" ")
-      header[0] = header[0].tr(":", "")
-      header[0] = header[0].tr("-", "_")
-      header.each do |token|
-        @headers[header[0].upcase] = token.tr("\n", "")
+      #p header_line
+      if header_line.include? "If-Modified-Since"
+        header = header_line.split(": ")
+        header[0] = header[0].tr("-", "_")
+        @headers[header[0].upcase] = header[1]
+        #p @headers[header[0].upcase]
+      else
+        header = header_line.split(" ")
+        header[0] = header[0].tr(":", "")
+        header[0] = header[0].tr("-", "_")
+      
+        header.each do |token|
+          @headers[header[0].upcase] = token.tr("\n", "")
+        end
       end
     end
 

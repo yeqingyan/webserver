@@ -4,12 +4,13 @@ module WebServer
     # (This allows us to inherit basic functionality in derived responses
     # to handle response code specific behavior)
     class Base
-      attr_reader :version, :code, :body
+      attr_reader :version, :code, :body, :modified
 
       def initialize(resource, options={})
         @code = options['CODE']
         @version = DEFAULT_HTTP_VERSION
-        
+        @modified = File.mtime(resource.resolve).gmtime.strftime("%a, %e %b %Y %H:%M:%S %Z")
+
         if options['BODY']
           path = options['BODY']
           @body = File.open(path, 'r').read
@@ -35,12 +36,14 @@ module WebServer
         @message += "Server: " + Response.default_headers["Server"] + "\n"
 
         #Entity Headers
+        @message += "Last-Modified: " + @modified + "\n"
 
         #New line to signify start of body
-        @message += "\n"
-        #p @message + "--- BODY HERE -----\n ----- END RESPONSE ---"
-
-        #Message Body
+        unless @body.include? "Content-Type:" #pearl script adds entity header itself for some reason
+          @message += "\n"
+        end
+        p @message
+        #Message Body 
         @message += @body
       end
 
