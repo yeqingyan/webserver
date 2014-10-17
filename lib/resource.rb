@@ -32,9 +32,6 @@ module WebServer
             end
     	end
 
-    	#if @request.uri == "/" || !script_aliased?
-         #   resolve_string = resolve_string + @conf.directory_index
-        #end
         if resolve_string[-1] == "/"
             resolve_string = resolve_string + @conf.directory_index
         end

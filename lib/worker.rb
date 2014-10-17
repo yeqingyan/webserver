@@ -10,31 +10,15 @@ module WebServer
     def initialize(client_socket, server=nil)
     	@socket = client_socket
     	@server = server
-
-    	process_request
     end
 
     # Processes the request
     def process_request
     	request = Request.new(@socket)
     	resource = Resource.new(request, $conf, $mime)
-    	#Simple index file return
-    	path = resource.resolve
-    	p path
+    	response = Response::Factory.create(resource, nil)
 
-    	file_content = ""
-    	if File.exists?(path)
-    		file_content = File.open(path, 'r').read
-    	else
-    		p "malformed uri"
-    	end
-    	modified = File.mtime(path).gmtime.strftime("%a, %e, %b %Y %H:%M:%S %Z")
-    	response = {"BODY" => file_content, "AGE" => 0, "LAST_MODIFIED" => modified, 
-    	"TYPE" => File.extname(path)}
-
-    	Response::Factory.create(200, response)
-
-    	@socket.puts(file_content)
+    	@socket.puts(response)
     end
   end
 end

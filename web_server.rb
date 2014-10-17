@@ -27,8 +27,8 @@ module WebServer
       # processing the requests as connections are made
       loop do
         Thread.start(@server.accept) do |client|
-          worker = WebServer::Worker.new(client, @server)
-          # client.puts "Hello"
+          worker = WebServer::Worker.new(client, nil)
+          worker.process_request
           client.close
         end
       end
