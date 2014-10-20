@@ -65,7 +65,7 @@ describe WebServer::Resource do
         object.stub(:alias_path).and_return('/bb/bb/bb')
         object
       end
-      let(:request) { request_double(uri: '/aa/aa/resource') }
+      let(:request) { request_double(uri: '/aa/aa/resource/') }
 
       it 'should return the absolute path to the file' do
         expected_path = '/doc_root/bb/bb/bb/resource/index.html'
@@ -79,7 +79,7 @@ describe WebServer::Resource do
       let(:conf) { conf_double(script_aliases: ['/ss/ss'], script_alias_path: '/tt/tt/tt', aliases: [])}
        #bject.stub(:aliases).and_return ['/aa/aa']
 
-      let(:request) { request_double(uri: '/ss/ss/resource') }
+      let(:request) { request_double(uri: '/ss/ss/resource/') }
 
       it 'returns true' do
         expect(WebServer::Resource.new(request, conf, mimes).script_aliased?).to be_true
@@ -88,7 +88,7 @@ describe WebServer::Resource do
 
     context 'for a non script aliased path' do
       let(:conf) { conf_double(script_aliases: [], aliases: [])}
-      let(:request) { request_double(uri: '/a/resource') }
+      let(:request) { request_double(uri: '/a/resource/') }
 
       it 'returns false for a non script aliased path' do
         expect(WebServer::Resource.new(request, conf, mimes).script_aliased?).to eq false
